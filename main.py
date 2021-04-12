@@ -7,9 +7,10 @@ from urllib.parse import quote
 import tkinter as tk
 from tkinter import *
 import _thread
-# from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askopenfilename
 
 sleeptm = "None, You can use this function to print the remaining time in seconds."
+filename = ''
 
 
 class CountryCodeException(Exception):
@@ -24,7 +25,7 @@ def prnt_sleeptm():
     return sleeptm
 
 
-def sendwhatmsg(phone_no, message, time_hour, time_min, wait_time=10, print_waitTime=True):
+def sendwhatmsg(phone_no, message, time_hour, time_min, wait_time=15, print_waitTime=True):
     global sleeptm
     if "+" not in phone_no:
         raise CountryCodeException("Country code missing from phone_no")
@@ -70,6 +71,13 @@ def sendwhatmsg(phone_no, message, time_hour, time_min, wait_time=10, print_wait
     pg.press('enter')
     pg.hotkey('ctrl', 'w')
     pg.press('enter')
+
+
+def browseFiles():
+    global filename
+    filename = askopenfilename(initialdir="/", title="Select a File", filetypes=(("CSV files", "*.csv*")))
+    MultiMessage.button_explore.configure(text=filename)
+
 
 
 class TimeTableApp(tk.Tk):
@@ -239,13 +247,13 @@ class MultiMessage(tk.Frame):
 
         label5 = tk.Label(self, text="CSV file : ", foreground="red", font=("Times New Roman", 10), )
         label5.pack()
-        entry2 = Entry(self, bd=4)
-        entry2.pack()
 
-        # filename = askopenfilename()
+        button_explore = Button(self, text="Browse Files", command=browseFiles)
+        button_explore.pack()
 
+        global filename
         btn1 = tk.Button(self, text='Send', bd='5',
-                         command=lambda: controller.messanger(entry1.get(), entry2.get()))
+                         command=lambda: controller.messanger(entry1.get(), filename))
         btn1.pack(padx=10, pady=10)
 
         button1 = tk.Button(self, text="Back to Home", command=lambda: controller.show_frame(StartPage))
