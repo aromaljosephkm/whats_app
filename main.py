@@ -29,7 +29,6 @@ def sendwhatmsg(phone_no, message, time_hour, time_min, wait_time=15, print_wait
     global sleeptm
     if "+" not in phone_no:
         raise CountryCodeException("Country code missing from phone_no")
-    timehr = time_hour
 
     if time_hour not in range(0, 25) or time_min not in range(0, 60):
         print("Invalid time format")
@@ -75,9 +74,7 @@ def sendwhatmsg(phone_no, message, time_hour, time_min, wait_time=15, print_wait
 
 def browseFiles():
     global filename
-    filename = askopenfilename(initialdir="/", title="Select a File", filetypes=(("CSV files", "*.csv*")))
-    MultiMessage.button_explore.configure(text=filename)
-
+    filename = askopenfilename(initialdir="/", title="Select a File", filetypes=("CSV files", "*.csv*"))
 
 
 class TimeTableApp(tk.Tk):
@@ -115,9 +112,9 @@ class TimeTableApp(tk.Tk):
     def messanger(message, csvfile):
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
-        list = current_time.split(':')
-        h = int(list[0])
-        m = int(list[1])
+        lists = current_time.split(':')
+        h = int(lists[0])
+        m = int(lists[1])
         m = m + 1
         if m > 59:
             m = 0
@@ -133,9 +130,9 @@ class TimeTableApp(tk.Tk):
                     print("Message sent to " + str(row[0]))
                     now = datetime.now()
                     current_time = now.strftime("%H:%M:%S")
-                    list = current_time.split(':')
-                    h = int(list[0])
-                    m = int(list[1])
+                    lists = current_time.split(':')
+                    h = int(lists[0])
+                    m = int(lists[1])
                     m = m + 1
                     if m > 59:
                         m = 0
@@ -146,9 +143,9 @@ class TimeTableApp(tk.Tk):
                     print('\nMessage Not Sent to ' + str(row[0]) + '\n')
                     now = datetime.now()
                     current_time = now.strftime("%H:%M:%S")
-                    list = current_time.split(':')
-                    h = int(list[0])
-                    m = int(list[1])
+                    lists = current_time.split(':')
+                    h = int(lists[0])
+                    m = int(lists[1])
                     m = m + 1
                     if m > 59:
                         m = 0
@@ -213,7 +210,16 @@ class Developer(tk.Frame):
         label1 = tk.Label(self, text="Bulk Whatsapp Messenger", foreground="red", font=("Times New Roman", 15))
         label1.pack(padx=50, pady=10)
 
-        label3 = tk.Label(self, text="Aromal Joseph K M\n(S7 CSE)", foreground="green", font=("Times New Roman", 10))
+        label3 = tk.Label(self, text="Aromal Joseph K M\n(S8 CSE)", foreground="green", font=("Times New Roman", 10))
+        label3.pack()
+
+        label3 = tk.Label(self, text="Thomas Anto\n(S8 CSE)", foreground="green", font=("Times New Roman", 10))
+        label3.pack()
+
+        label3 = tk.Label(self, text="Arun Augustine\n(S8 CSE)", foreground="green", font=("Times New Roman", 10))
+        label3.pack()
+
+        label3 = tk.Label(self, text="Febin Johnson\n(S8 CSE)", foreground="green", font=("Times New Roman", 10))
         label3.pack()
 
         label4 = tk.Label(self, text="Team Ignited Minds", foreground="red", font=("Times New Roman", 10))
