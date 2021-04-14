@@ -8,9 +8,13 @@ import tkinter as tk
 from tkinter import *
 import _thread
 from tkinter.filedialog import askopenfilename
+import os
+from threading import *
 
 sleeptm = "None, You can use this function to print the remaining time in seconds."
 filename = ''
+t1 = Thread()
+stop = 0
 
 
 class CountryCodeException(Exception):
@@ -25,7 +29,7 @@ def prnt_sleeptm():
     return sleeptm
 
 
-def sendwhatmsg(phone_no, message, time_hour, time_min, wait_time=15, print_waitTime=True):
+def sendwhatmsg(phone_no, message, time_hour, time_min, wait_time=10, print_waitTime=True):
     global sleeptm
     if "+" not in phone_no:
         raise CountryCodeException("Country code missing from phone_no")
@@ -60,7 +64,7 @@ def sendwhatmsg(phone_no, message, time_hour, time_min, wait_time=15, print_wait
         print(
             f"In {prnt_sleeptm()} seconds web.whatsapp.com will open and after {wait_time} seconds message will be "
             f"delivered")
-    time.sleep(sleeptm)
+    #time.sleep(sleeptm)
     parsedMessage = quote(message)
     web.open('https://web.whatsapp.com/send?phone=' + phone_no + '&text=' + parsedMessage)
     time.sleep(2)
@@ -74,7 +78,11 @@ def sendwhatmsg(phone_no, message, time_hour, time_min, wait_time=15, print_wait
 
 def browseFiles():
     global filename
-    filename = askopenfilename(initialdir="/", title="Select a File", filetypes=("CSV files", "*.csv*"))
+    path = os.getcwd()
+    filename = askopenfilename(initialdir=path,
+                               filetypes=(("CSV File", "*.csv"), ("All Files", "*.*")),
+                               title="Choose a file."
+                               )
 
 
 class TimeTableApp(tk.Tk):
@@ -100,6 +108,8 @@ class TimeTableApp(tk.Tk):
         frame.tkraise()
 
     def destroy_frame(self):
+        global stop
+        stop = 1
         self.destroy()
 
     @staticmethod
@@ -107,6 +117,12 @@ class TimeTableApp(tk.Tk):
         web.open('https://web.whatsapp.com/')
         time.sleep(30)
         pg.hotkey('ctrl', 'w')
+
+    @staticmethod
+    def threading(message, csvfile):
+        global t1
+        t1 = Thread(target=TimeTableApp.messanger, args=(message, csvfile))
+        t1.start()
 
     @staticmethod
     def messanger(message, csvfile):
@@ -126,19 +142,20 @@ class TimeTableApp(tk.Tk):
             for row in reader:
                 try:
                     # _thread.start_new_thread(sendwhatmsg, ('+91' + str(row[1]), message, h, m))
-                    sendwhatmsg('+91' + str(row[1]), message, h, m)
-                    print("Message sent to " + str(row[0]))
-                    now = datetime.now()
-                    current_time = now.strftime("%H:%M:%S")
-                    lists = current_time.split(':')
-                    h = int(lists[0])
-                    m = int(lists[1])
-                    m = m + 1
-                    if m > 59:
-                        m = 0
-                        h = h + 1
-                        if h > 23:
-                            h = 0
+                    if not stop:
+                        sendwhatmsg('+91' + str(row[1]), message, h, m)
+                        print("Message sent to " + str(row[0]))
+                        now = datetime.now()
+                        current_time = now.strftime("%H:%M:%S")
+                        lists = current_time.split(':')
+                        h = int(lists[0])
+                        m = int(lists[1])
+                        m = m + 1
+                        if m > 59:
+                            m = 0
+                            h = h + 1
+                            if h > 23:
+                                h = 0
                 except:
                     print('\nMessage Not Sent to ' + str(row[0]) + '\n')
                     now = datetime.now()
@@ -177,6 +194,14 @@ class StartPage(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+
+        pg.alert("*Don't Use this PC during the message sending process\n\n"
+                 "*Check your internet speed, If it is slow Kindly use the App later\n\n"
+                 "*Please Keep your Whatsapp Open in your phone\n\n"
+                 "*You must do the configuration run and scan your whatsapp web\n\n"
+                 "*If you failed scanning once do configuration run again\n\n"
+                 "*You must attach only CSV files which contain name and phone number without headings\n\n"
+                 "     Click OK if you are good to go!")
 
         label1 = tk.Label(self, text="Bulk Whatsapp Messenger", foreground="red", font=("Times New Roman", 15))
         label1.pack(padx=50, pady=10)
@@ -248,7 +273,7 @@ class MultiMessage(tk.Frame):
 
         label4 = tk.Label(self, text="Message : ", foreground="red", font=("Times New Roman", 10), )
         label4.pack()
-        entry1 = Entry(self, bd=4)
+        entry1 = Text(self, height=4, width=30)
         entry1.pack()
 
         label5 = tk.Label(self, text="CSV file : ", foreground="red", font=("Times New Roman", 10), )
@@ -259,7 +284,7 @@ class MultiMessage(tk.Frame):
 
         global filename
         btn1 = tk.Button(self, text='Send', bd='5',
-                         command=lambda: controller.messanger(entry1.get(), filename))
+                         command=lambda: controller.threading(entry1.get("1.0", "end-1c"), filename))
         btn1.pack(padx=10, pady=10)
 
         button1 = tk.Button(self, text="Back to Home", command=lambda: controller.show_frame(StartPage))
@@ -284,7 +309,7 @@ class SingleMessage(tk.Frame):
 
         label4 = tk.Label(self, text="Message : ", foreground="red", font=("Times New Roman", 10), )
         label4.pack()
-        entry1 = Entry(self, bd=4)
+        entry1 = Text(self, height=4, width=30)
         entry1.pack()
 
         label5 = tk.Label(self, text="Phone Number : ", foreground="red", font=("Times New Roman", 10), )
@@ -293,7 +318,7 @@ class SingleMessage(tk.Frame):
         entry2.pack()
 
         btn1 = tk.Button(self, text='Send', bd='5',
-                         command=lambda: controller.unknownNumber(entry1.get(), entry2.get()))
+                         command=lambda: controller.unknownNumber(entry1.get("1.0", "end-1c"), entry2.get()))
         btn1.pack(padx=10, pady=10)
 
         btn2 = tk.Button(self, text="Back to Home", command=lambda: controller.show_frame(StartPage))
